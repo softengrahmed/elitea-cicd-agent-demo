@@ -1,0 +1,108 @@
+Started by GitHub push by sathishravigithub
+Obtained Jenkinsfile from git https://github.com/my-ml-pocs/LLM
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /Users/sathish_ravi/.jenkins/workspace/Kubernetes
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+using credential github-pat
+Wiping out workspace first.
+Cloning the remote Git repository
+Cloning repository https://github.com/my-ml-pocs/LLM
+ > git init /Users/sathish_ravi/.jenkins/workspace/Kubernetes # timeout=10
+Fetching upstream changes from https://github.com/my-ml-pocs/LLM
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.5 (Apple Git-154)'
+using GIT_ASKPASS to set credentials GitHub
+ > git fetch --tags --force --progress -- https://github.com/my-ml-pocs/LLM +refs/heads/*:refs/remotes/main/* # timeout=10
+ > git config remote.main.url https://github.com/my-ml-pocs/LLM # timeout=10
+ > git config --add remote.main.fetch +refs/heads/*:refs/remotes/main/* # timeout=10
+Avoid second fetch
+ > git rev-parse refs/remotes/main/main^{commit} # timeout=10
+Checking out Revision a8fed714c7f320147f11f76315f69a9bf4b0889b (refs/remotes/main/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f a8fed714c7f320147f11f76315f69a9bf4b0889b # timeout=10
+Commit message: "Update Jenkinsfile"
+ > git rev-list --no-walk 12e2140eac148024dc074c316497eedc8ef9573f # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ git rev-parse --short HEAD
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout Code)
+[Pipeline] git
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /Users/sathish_ravi/.jenkins/workspace/Kubernetes/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/sathishravigithub/LLM.git # timeout=10
+Fetching upstream changes from https://github.com/sathishravigithub/LLM.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.5 (Apple Git-154)'
+ > git fetch --tags --force --progress -- https://github.com/sathishravigithub/LLM.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+ > git rev-parse origin/master^{commit} # timeout=10
+ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.
+ERROR: Maximum checkout retry attempts reached, aborting
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Static Code Analysis)
+Stage "Static Code Analysis" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Quality Gate)
+Stage "Quality Gate" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Build and Push)
+Stage "Docker Build and Push" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Security Scan)
+Stage "Security Scan" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+Stage "Deploy" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] fileExists
+[Pipeline] sh
++ kubectl rollout undo deployment/myapp
+deployment.apps/myapp rolled back
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.
+Finished: FAILURE
