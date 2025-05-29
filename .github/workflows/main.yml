@@ -1,0 +1,79 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  DOCKER_REGISTRY: localhost:5000
+  APP_NAME: myapp
+  Sonar_Url: https://localhost
+  Sonar_Token: sonarqube
+  security_scan_tool: trivy
+  GIT_SHA: ${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout SCM
+      uses: actions/checkout@v3
+
+    - name: Install Dependencies
+      run: |
+        composer install
+
+    - name: Build
+      run: |
+        echo "Build step for PHP application"
+
+    - name: Run Unit Tests
+      run: |
+        ./vendor/bin/phpunit --configuration phpunit.xml
+
+    - name: Static Code Analysis
+      run: |
+        sonar-scanner -Dsonar.host.url=${{ env.Sonar_Url }} -Dsonar.login=${{ env.Sonar_Token }}
+
+    - name: Quality Gate
+      run: |
+        QUALITY_GATE_STATUS=$(curl -s -u ${{ env.Sonar_Token }}: "${{ env.Sonar_Url }}/api/qualitygates/project_status?projectKey=${{ env.APP_NAME }}" | jq -r .projectStatus.status)
+        if [[ "$QUALITY_GATE_STATUS" != "OK" && "$QUALITY_GATE_STATUS" != "NONE" ]]; then
+          echo "Quality Gate failed with status: $QUALITY_GATE_STATUS";
+          exit 1;
+        fi
+
+    - name: Docker Build and Push
+      run: |
+        docker build -t ${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.GIT_SHA }} .
+        docker push ${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.GIT_SHA }}
+
+    - name: Security Scan
+      run: |
+        trivy image ${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.GIT_SHA }}
+
+    - name: Deploy
+      run: |
+        if [ -f "helm/values.yaml" ]; then
+          helm upgrade --install ${{ env.APP_NAME }} ./helm --set image.repository=${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }},image.tag=${{ env.GIT_SHA }}
+        elif [ -f "deployment.yaml" ]; then
+          case "$(uname -s)" in
+            Darwin*) sed -i '' "s|image: .*|image: ${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.GIT_SHA }}|" deployment.yaml ;;
+            *) sed -i "s|image: .*|image: ${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.GIT_SHA }}|" deployment.yaml ;;
+          esac
+          kubectl apply -f deployment.yaml
+        else
+          echo "No deployment configuration found!";
+          exit 1;
+        fi
+
+    - name: Rollback on Failure
+      if: failure()
+      run: |
+        echo "Rolling back to previous stable version..."
+        # Add rollback logic here
